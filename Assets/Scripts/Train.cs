@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Train : MonoBehaviour
 {
-    float moveTime = 0;
+    float moveTime;
     Vector3 startPos;
 
     [Header("가속도 : m/s^2")]
@@ -12,30 +13,53 @@ public class Train : MonoBehaviour
     [Header("최대 속도 : m/s")]
     public float maxVelocity;
 
-    public float velocity
-    {
-        get; set;
-    }
+    [SerializeField] Text txtVelocity;
+    [SerializeField] Text txtPosition;
+
+    [SerializeField] Text txtIsUpdate;
+    [SerializeField] Text txtIsStop;
+
+    public float velocity { get; set;}
 
     // Start is called before the first frame update
     void Awake()
     {
-        //startPos = transform.position;
+        startPos = transform.position;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //velocity = Mathf.Max(maxVelocity, velocity + acceleration * Time.deltaTime);
-        //transform.position += transform.forward * velocity * Time.deltaTime;
+        if (GameManager.Instance == null) return;
+        if (false == GameManager.Instance.IsPlace) return;
 
-        //moveTime += Time.deltaTime;
+        txtIsUpdate.text = "Update";
+        
+        if (false == GameManager.Instance.IsStop)
+        {
+            txtIsStop.text = "Start Train";
+            velocity = Mathf.Max(maxVelocity, velocity + acceleration * Time.deltaTime);
+            transform.position += transform.forward * velocity * Time.deltaTime;
 
-        //if(30 <= moveTime)
-        //{
-        //    gameObject.SetActive(false);
-        //    moveTime = 0;
-        //}
+            txtVelocity.text = velocity.ToString();
+            txtPosition.text = transform.position.z.ToString("N3");
+
+            moveTime += Time.deltaTime;
+
+            if (20f <= moveTime)
+            {
+                //gameObject.SetActive(false);
+                velocity = 0f;
+                txtIsStop.text = "Stop Train";
+                moveTime = 0;
+            }
+        }
+        else
+        {
+            maxVelocity = 0f;
+            acceleration = 0f;
+            moveTime = 0f;
+        }
     }
 
     public void ReLocation()
